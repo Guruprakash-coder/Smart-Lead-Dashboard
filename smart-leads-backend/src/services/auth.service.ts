@@ -19,7 +19,7 @@ export const registerUser = async (userData: Partial<IUser>) => {
   const user = await User.create(userData);
   
   // Generate token
-  const token = generateToken(user._id as string, user.role);
+  const token = generateToken(user._id.toString(), user.role);
   return { user, token };
 };
 
@@ -33,6 +33,6 @@ export const loginUser = async (email: string, password: string) => {
   }
 
   // Generate token
-  const token = generateToken(user._id as string, user.role);
+  const token = generateToken(user._id.toString(), user.role);
   return { user, token };
 };

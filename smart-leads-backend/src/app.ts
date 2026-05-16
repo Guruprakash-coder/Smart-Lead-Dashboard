@@ -1,33 +1,28 @@
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express from 'express';
 import cors from 'cors';
-import helmet from 'helmet';
 import authRoutes from './routes/auth.routes';
 import leadRoutes from './routes/lead.routes';
-// Mount Routes
 
-const app: Application = express();
+const app = express();
 
-// Global Middlewares
+// 1. Configure CORS with absolute preflight and origin options for your Vite frontend
+app.use(cors({
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// 2. Parse incoming JSON payloads
+app.use(express.json());
+
+// 3. Basic Health Check Route (Great for testing if backend is alive)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'Server is healthy and running smoothly!' });
+});
+
+// 4. Mount Application API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
-app.use(helmet()); // Secures your Express apps by setting various HTTP headers
-app.use(cors()); // Enables Cross-Origin Resource Sharing (crucial for your React frontend)
-app.use(express.json()); // Parses incoming requests with JSON payloads
-app.use(express.urlencoded({ extended: true }));
-
-// Health Check Route
-app.get('/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'UP', message: 'Server is running smoothly' });
-});
-
-// Global Error Handling Middleware Placeholder (We will expand this later)
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  const statusCode = err.statusCode || 500;
-  res.status(statusCode).json({
-    success: false,
-    message: err.message || 'Internal Server Error',
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-  });
-});
 
 export default app;

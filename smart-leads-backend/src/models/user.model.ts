@@ -41,17 +41,18 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-// 3. Pre-save hook to hash the password before saving to the database
-UserSchema.pre<IUser>('save', async function (next) {
-  // Only hash the password if it has been modified (or is new)
-  if (!this.isModified('password')) return next();
+// 3. Pre-save hook to hash the password safely using an explicit function signature
+UserSchema.pre('save', async function (this: any, next: any) {
+  if (!this.isModified('password')) {
+    return next();
+  }
 
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    next();
+    return next();
   } catch (error: any) {
-    next(error);
+    return next(error);
   }
 });
 
