@@ -2,13 +2,14 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import authRoutes from './routes/auth.routes';
-
+import leadRoutes from './routes/lead.routes';
 // Mount Routes
 
 const app: Application = express();
 
 // Global Middlewares
 app.use('/api/auth', authRoutes);
+app.use('/api/leads', leadRoutes);
 app.use(helmet()); // Secures your Express apps by setting various HTTP headers
 app.use(cors()); // Enables Cross-Origin Resource Sharing (crucial for your React frontend)
 app.use(express.json()); // Parses incoming requests with JSON payloads
