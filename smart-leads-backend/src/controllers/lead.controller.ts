@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import Lead from '../models/lead.model';
+import { Parser } from 'json2csv';
 
 // @desc    Create a new lead
 // @route   POST /api/leads
@@ -125,6 +126,41 @@ export const deleteLead = async (req: Request, res: Response): Promise<void> => 
     }
 
     res.status(200).json({ success: true, message: 'Lead deleted successfully' });
+  } catch (error: any) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+
+
+// @desc    Export leads to CSV based on current filters
+// @route   GET /api/leads/export
+export const exportLeadsCSV = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { status, source, search } = req.query;
+    const query: any = {};
+
+    if (status) query.status = status;
+    if (source) query.source = source;
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    // Fetch the filtered records from the database
+    const leads = await Lead.find(query).select('name email status source createdAt');
+
+    // Parse the data fields into a clean CSV layout
+    const fields = ['name', 'email', 'status', 'source', 'createdAt'];
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(leads);
+
+    // Set headers to force the browser to trigger a file download automatically
+    res.header('Content-Type', 'text/csv');
+    res.attachment('smart-leads-export.csv');
+    res.status(200).send(csv);
   } catch (error: any) {
     res.status(500).json({ success: false, message: error.message });
   }

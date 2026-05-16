@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createLead, getLeads, getLead, updateLead, deleteLead } from '../controllers/lead.controller';
+import { createLead, getLeads, getLead, updateLead, deleteLead, exportLeadsCSV } from '../controllers/lead.controller';
 import { protect, authorize } from '../middlewares/auth.middleware';
 
 const router = Router();
@@ -11,7 +11,7 @@ router.use(protect);
 router.route('/')
   .post(createLead)
   .get(getLeads);
-
+router.get('/export', exportLeadsCSV);
 router.route('/:id')
   .get(getLead)
   .put(updateLead)
