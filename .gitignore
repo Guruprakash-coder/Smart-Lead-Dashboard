@@ -1,0 +1,10 @@
+# Master GitIgnore
+node_modules/
+dist/
+.env
+.DS_Store
+
+# Frontend specifics
+build/
+.next/
+out/
