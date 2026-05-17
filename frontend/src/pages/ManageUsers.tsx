@@ -13,9 +13,8 @@ interface User {
 }
 
 const ManageUsers = () => {
-  
-  // We use this to prevent the Admin from accidentally deleting themselves!
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentUserString = localStorage.getItem('user');
+  const currentUser = currentUserString ? JSON.parse(currentUserString) : {};
   
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +51,7 @@ const ManageUsers = () => {
       await api.post('/auth/register', formData);
       toast.success(`${formData.role} created successfully!`);
       setFormData({ name: '', email: '', password: '', role: 'Sales User' });
-      fetchUsers(); // Instantly refresh the table!
+      fetchUsers();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to create user');
     } finally {
@@ -61,7 +60,6 @@ const ManageUsers = () => {
   };
 
   const handleDeleteUser = async (id: string) => {
-    // Safety Check: Admin cannot delete themselves
     if (id === currentUser.id || id === currentUser._id) {
       return toast.error('Action blocked: You cannot delete yourself!');
     }
@@ -71,60 +69,60 @@ const ManageUsers = () => {
     try {
       await api.delete(`/users/${id}`);
       toast.success('User deleted successfully');
-      fetchUsers(); // Refresh the table
+      fetchUsers();
     } catch (error) {
       toast.error('Failed to delete user');
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-4 sm:p-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
         <div className="flex items-center mb-8">
-          <Link to="/" className="text-gray-500 hover:text-gray-700 transition-colors mr-4 bg-white p-2 rounded-full shadow-sm border border-gray-200">
+          <Link to="/" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors mr-4 bg-white dark:bg-gray-800 p-2 rounded-full shadow-sm border border-gray-200 dark:border-gray-700">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">User Management</h1>
-            <p className="text-sm text-gray-500">Admin Control Panel</p>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">User Management</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Admin Control Panel</p>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
           {/* LEFT COLUMN: Create User Form */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 h-fit">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-              <UserPlus className="h-5 w-5 mr-2 text-blue-600" /> Create New Account
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6 h-fit transition-colors">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center">
+              <UserPlus className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" /> Create New Account
             </h2>
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
                 <input
-                  type="text" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  type="text" required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                 <input
-                  type="email" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  type="email" required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   value={formData.email} onChange={(e) => setFormData({...formData, email: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Temporary Password</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Temporary Password</label>
                 <input
-                  type="password" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  type="password" required className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   value={formData.password} onChange={(e) => setFormData({...formData, password: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Role Designation</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Role Designation</label>
                 <select
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   value={formData.role} onChange={(e) => setFormData({...formData, role: e.target.value})}
                 >
                   <option value="Sales User">Sales User</option>
@@ -141,12 +139,12 @@ const ManageUsers = () => {
           </div>
 
           {/* RIGHT COLUMN: User List Table */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden h-fit">
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center">
-                <Shield className="h-5 w-5 mr-2 text-gray-600" /> Active System Users
+          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden h-fit transition-colors">
+            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center">
+                <Shield className="h-5 w-5 mr-2 text-gray-600 dark:text-gray-400" /> Active System Users
               </h2>
-              <span className="bg-gray-200 text-gray-700 text-xs font-bold px-3 py-1 rounded-full">
+              <span className="bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs font-bold px-3 py-1 rounded-full">
                 {users.length} Users
               </span>
             </div>
@@ -157,31 +155,31 @@ const ManageUsers = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-white">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                  <thead className="bg-white dark:bg-gray-800">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">User</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
+                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                     {users.map((u) => (
-                      <tr key={u._id} className="hover:bg-gray-50 transition-colors">
+                      <tr key={u._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium text-gray-900">{u.name}</div>
-                          <div className="text-sm text-gray-500">{u.email}</div>
+                          <div className="font-medium text-gray-900 dark:text-white">{u.name}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{u.email}</div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                            ${u.role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-green-100 text-green-800'}`}>
+                            ${u.role === 'Admin' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300' : 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300'}`}>
                             {u.role}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <button 
                             onClick={() => handleDeleteUser(u._id)} 
-                            className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 transition-colors"
+                            className="text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                             title="Delete User"
                           >
                             <Trash2 className="h-5 w-5" />
