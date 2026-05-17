@@ -16,8 +16,12 @@ const Login = () => {
       setLoading(true);
       const response = await api.post('/auth/login', { email, password });
       
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      // Axios puts the backend JSON inside 'response.data'
+      // Your backend puts the actual user and token inside 'data'
+      const payload = response.data.data; 
+      
+      localStorage.setItem('token', payload.token);
+      localStorage.setItem('user', JSON.stringify(payload));
       
       toast.success('Logged in successfully!');
       navigate('/');
