@@ -1,24 +1,9 @@
 import axios from 'axios';
 
-const api = axios.create({
-  baseURL: 'http://localhost:5000/api', // Your backend URL
+const instance = axios.create({
+  // This tells Vite: "If we are on Vercel, use the live URL. If we are testing locally, use localhost"
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  withCredentials: true,
 });
 
-// Add a request interceptor to automatically attach the token
-api.interceptors.request.use(
-  (config) => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const { token } = JSON.parse(user);
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-export default api;
+export default instance;
