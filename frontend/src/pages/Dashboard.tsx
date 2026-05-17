@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Download, Search, Loader2, Plus, Edit2, Trash2, X } from 'lucide-react';
+import { LogOut, Download, Search, Loader2, Plus, Edit2, Trash2, X,UserPlus } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../api/axios';
 
@@ -190,9 +190,18 @@ const Dashboard = () => {
             {user.role} Panel
           </span>
         </div>
-        <button onClick={handleLogout} className="flex items-center text-gray-600 hover:text-red-600 transition-colors">
-          <LogOut className="h-5 w-5 mr-2" /> Logout
-        </button>
+        
+        <div className="flex items-center gap-6">
+          {/* Only Admins see the Add User button */}
+          {isAdmin && (
+            <button onClick={() => navigate('/register')} className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+              <UserPlus className="h-4 w-4 mr-1" /> Add User
+            </button>
+          )}
+          <button onClick={handleLogout} className="flex items-center text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">
+            <LogOut className="h-4 w-4 mr-1" /> Logout
+          </button>
+        </div>
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
