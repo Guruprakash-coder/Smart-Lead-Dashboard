@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { UserPlus, Loader2, ArrowLeft, Trash2, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../api/axios';
@@ -13,7 +13,7 @@ interface User {
 }
 
 const ManageUsers = () => {
-  const navigate = useNavigate();
+  
   // We use this to prevent the Admin from accidentally deleting themselves!
   const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
   
