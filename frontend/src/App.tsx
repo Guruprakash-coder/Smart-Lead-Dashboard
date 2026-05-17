@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { Toaster } from 'react-hot-toast';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
-import Register from './pages/Register';
+import ManageUsers from './pages/ManageUsers';
 
 // Basic protection (Must be logged in)
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -32,7 +32,7 @@ function App() {
           path="/register" 
           element={
             <AdminRoute>
-              <Register />
+              <ManageUsers />
             </AdminRoute>
           } 
         />

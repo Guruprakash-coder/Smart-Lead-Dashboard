@@ -192,10 +192,10 @@ const Dashboard = () => {
         </div>
         
         <div className="flex items-center gap-6">
-          {/* Only Admins see the Add User button */}
+          {/* Only Admins see the Manage Users button */}
           {isAdmin && (
-            <button onClick={() => navigate('/register')} className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
-              <UserPlus className="h-4 w-4 mr-1" /> Add User
+            <button onClick={() => navigate('/users')} className="flex items-center text-sm font-medium text-blue-600 hover:text-blue-800 transition-colors">
+              <Shield className="h-4 w-4 mr-1" /> Manage Users
             </button>
           )}
           <button onClick={handleLogout} className="flex items-center text-sm font-medium text-gray-600 hover:text-red-600 transition-colors">

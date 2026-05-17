@@ -2,7 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.routes';
 import leadRoutes from './routes/lead.routes';
-
+import userRoutes from './routes/user.routes';
 const app = express();
 
 // 1. Configure CORS to accept requests from both Localhost AND Vercel
@@ -36,5 +36,6 @@ app.get('/health', (req, res) => {
 // 4. Mount Application API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/leads', leadRoutes);
+app.use('/api/users', userRoutes);
 
 export default app;
