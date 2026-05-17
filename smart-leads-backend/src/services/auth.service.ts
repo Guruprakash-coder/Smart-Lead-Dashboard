@@ -9,30 +9,41 @@ const generateToken = (id: string, role: string): string => {
 };
 
 export const registerUser = async (userData: Partial<IUser>) => {
-  // Check if user already exists
   const existingUser = await User.findOne({ email: userData.email });
   if (existingUser) {
     throw new Error('Email already in use');
   }
 
-  // Create user
   const user = await User.create(userData);
-  
-  // Generate token
   const token = generateToken(user._id.toString(), user.role);
   return { user, token };
 };
 
 export const loginUser = async (email: string, password: string) => {
+  console.log('\n--- 🕵️ LOGIN ATTEMPT ---');
+  console.log(`1. Email typed: "${email}"`);
+  console.log(`2. Password typed: "${password}"`);
+  
   // Find user by email
   const user = await User.findOne({ email });
   
-  // Check if user exists AND password matches
-  if (!user || !(await user.comparePassword(password))) {
+  if (!user) {
+    console.log('❌ Error: USER NOT FOUND IN MONGODB!');
     throw new Error('Invalid email or password');
   }
 
-  // Generate token
+  console.log('✅ Success: User found in Database!');
+  console.log(`3. DB Password Hash looks like: ${user.password.substring(0, 15)}...`);
+  
+  // Check if password matches
+  const isMatch = await user.comparePassword(password);
+  
+  if (!isMatch) {
+    console.log('❌ Error: PASSWORD DOES NOT MATCH THE DATABASE HASH!');
+    throw new Error('Invalid email or password');
+  }
+
+  console.log('✅ Success: Password matched perfectly! Logging you in...');
   const token = generateToken(user._id.toString(), user.role);
   return { user, token };
 };
