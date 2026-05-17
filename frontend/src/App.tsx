@@ -14,10 +14,21 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 // Advanced protection (Must be logged in AND be an Admin)
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
   const userString = localStorage.getItem('user');
-  if (!userString) return <Navigate to="/login" />;
   
-  const user = JSON.parse(userString);
-  return user.role === 'Admin' ? <>{children}</> : <Navigate to="/" />;
+  // If no user or the storage is corrupted with the word "undefined"
+  if (!userString || userString === 'undefined') {
+    localStorage.removeItem('user'); // Self-heal: clean up the mess
+    return <Navigate to="/login" />;
+  }
+  
+  try {
+    const user = JSON.parse(userString);
+    return user.role === 'Admin' ? <>{children}</> : <Navigate to="/" />;
+  } catch (error) {
+    // If JSON.parse fails, wipe the corrupted data and redirect
+    localStorage.removeItem('user');
+    return <Navigate to="/login" />;
+  }
 };
 
 function App() {

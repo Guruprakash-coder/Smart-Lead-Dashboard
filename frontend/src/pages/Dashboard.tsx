@@ -19,7 +19,12 @@ const Dashboard = () => {
   const { theme, toggleTheme } = useDarkMode();
   
   const userString = localStorage.getItem('user');
-  const user = userString ? JSON.parse(userString) : null;
+  let user = null;
+  try {
+    user = userString && userString !== 'undefined' ? JSON.parse(userString) : null;
+  } catch (error) {
+    localStorage.removeItem('user');
+  }
   const isAdmin = user?.role === 'Admin';
 
   const [leads, setLeads] = useState<Lead[]>([]);

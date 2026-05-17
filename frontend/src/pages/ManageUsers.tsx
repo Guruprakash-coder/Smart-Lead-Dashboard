@@ -14,8 +14,12 @@ interface User {
 
 const ManageUsers = () => {
   const currentUserString = localStorage.getItem('user');
-  const currentUser = currentUserString ? JSON.parse(currentUserString) : {};
-  
+  let currentUser = {};
+  try {
+    currentUser = currentUserString && currentUserString !== 'undefined' ? JSON.parse(currentUserString) : {};
+  } catch (error) {
+    localStorage.removeItem('user');
+  }
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
