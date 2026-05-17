@@ -14,7 +14,7 @@ interface User {
 
 const ManageUsers = () => {
   const currentUserString = localStorage.getItem('user');
-  let currentUser = {};
+  let currentUser: any = {};
   try {
     currentUser = currentUserString && currentUserString !== 'undefined' ? JSON.parse(currentUserString) : {};
   } catch (error) {
