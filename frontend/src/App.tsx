@@ -27,9 +27,9 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         
-        {/* Only Admins can access the Registration Page */}
+        {/* The missing route: Only Admins can access the User Management Page */}
         <Route 
-          path="/register" 
+          path="/users" 
           element={
             <AdminRoute>
               <ManageUsers />
