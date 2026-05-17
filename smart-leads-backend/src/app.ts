@@ -5,9 +5,21 @@ import leadRoutes from './routes/lead.routes';
 
 const app = express();
 
-// 1. Configure CORS with absolute preflight and origin options for your Vite frontend
+// 1. Configure CORS to accept requests from both Localhost AND Vercel
+const allowedOrigins = [
+  'http://localhost:5173', 
+  process.env.FRONTEND_URL // Render will read your Vercel URL from the dashboard
+];
+
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
