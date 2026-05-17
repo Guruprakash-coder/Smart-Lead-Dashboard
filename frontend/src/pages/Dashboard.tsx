@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Download, Search, Loader2, Plus, Edit2, Trash2, X,UserPlus,Shield } from 'lucide-react';
+import { LogOut, Download, Search, Loader2, Plus, Edit2, Trash2, X,Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import api from '../api/axios';
 
