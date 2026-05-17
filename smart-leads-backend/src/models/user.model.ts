@@ -41,19 +41,15 @@ const UserSchema: Schema = new Schema(
   }
 );
 
-// 3. Pre-save hook to hash the password safely using an explicit function signature
-UserSchema.pre('save', async function (this: any, next: any) {
+// 3. Modern, Promise-based Pre-save hook (No 'next' required!)
+UserSchema.pre('save', async function (this: any) {
   if (!this.isModified('password')) {
-    return next();
+    return; // Just return to proceed
   }
 
-  try {
-    const salt = await bcrypt.genSalt(10);
-    this.password = await bcrypt.hash(this.password, salt);
-    return next();
-  } catch (error: any) {
-    return next(error);
-  }
+  // If password was changed, hash it automatically
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
 });
 
 // 4. Helper method to check passwords during login
