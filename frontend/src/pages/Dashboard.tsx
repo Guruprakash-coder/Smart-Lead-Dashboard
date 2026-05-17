@@ -38,10 +38,11 @@ const Dashboard = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Add Lead Modal State
+  // Dynamic Add/Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newLead, setNewLead] = useState({
+  const [editingLeadId, setEditingLeadId] = useState<string | null>(null);
+  const [leadForm, setLeadForm] = useState({
     name: '',
     email: '',
     status: 'New',
@@ -83,17 +84,45 @@ const Dashboard = () => {
     }
   };
 
-  const handleCreateLead = async (e: React.FormEvent) => {
+  // Helper to close and reset the modal completely
+  const closeAndResetModal = () => {
+    setIsModalOpen(false);
+    setEditingLeadId(null);
+    setLeadForm({ name: '', email: '', status: 'New', source: 'Website' });
+  };
+
+  // Opens the modal and pre-fills it with the selected lead's data
+  const openEditModal = (lead: Lead) => {
+    setEditingLeadId(lead._id);
+    setLeadForm({
+      name: lead.name,
+      email: lead.email,
+      status: lead.status,
+      source: lead.source
+    });
+    setIsModalOpen(true);
+  };
+
+  // Handles BOTH Creating and Updating
+  const handleCreateOrUpdateLead = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      await api.post('/leads', newLead);
-      toast.success('Lead created successfully!');
-      setIsModalOpen(false);
-      setNewLead({ name: '', email: '', status: 'New', source: 'Website' }); // Reset form
+      
+      if (editingLeadId) {
+        // We are EDITING an existing lead
+        await api.put(`/leads/${editingLeadId}`, leadForm);
+        toast.success('Lead updated successfully!');
+      } else {
+        // We are CREATING a new lead
+        await api.post('/leads', leadForm);
+        toast.success('Lead created successfully!');
+      }
+      
+      closeAndResetModal();
       fetchLeads(); // Instantly refresh the table
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Failed to create lead');
+      toast.error(error.response?.data?.message || `Failed to ${editingLeadId ? 'update' : 'create'} lead`);
     } finally {
       setIsSubmitting(false);
     }
@@ -177,7 +206,7 @@ const Dashboard = () => {
               <Download className="h-4 w-4 mr-2" /> Export CSV
             </button>
             <button 
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => { closeAndResetModal(); setIsModalOpen(true); }}
               className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
             >
               <Plus className="h-4 w-4 mr-2" /> Add Lead
@@ -275,8 +304,21 @@ const Dashboard = () => {
                         {new Date(lead.createdAt).toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <button className="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400 mr-4 transition-colors"><Edit2 className="h-4 w-4" /></button>
-                        <button onClick={() => handleDelete(lead._id)} className="text-red-600 hover:text-red-900 dark:hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4" /></button>
+                        {/* THE NEW ACTIVE EDIT BUTTON */}
+                        <button 
+                          onClick={() => openEditModal(lead)} 
+                          className="text-blue-600 hover:text-blue-900 dark:hover:text-blue-400 mr-4 transition-colors"
+                          title="Edit Lead"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(lead._id)} 
+                          className="text-red-600 hover:text-red-900 dark:hover:text-red-400 transition-colors"
+                          title="Delete Lead"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -310,28 +352,31 @@ const Dashboard = () => {
         </div>
       </main>
 
-      {/* ADD LEAD MODAL */}
+      {/* DYNAMIC ADD/EDIT LEAD MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 border border-gray-200 dark:border-gray-700">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">Create New Lead</h3>
+              {/* Dynamic Header */}
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                {editingLeadId ? 'Edit Lead' : 'Create New Lead'}
+              </h3>
               <button 
-                onClick={() => setIsModalOpen(false)} 
+                onClick={closeAndResetModal} 
                 className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
-            <form onSubmit={handleCreateLead} className="space-y-4">
+            <form onSubmit={handleCreateOrUpdateLead} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
                 <input
                   type="text"
                   required
-                  value={newLead.name}
-                  onChange={(e) => setNewLead({...newLead, name: e.target.value})}
+                  value={leadForm.name}
+                  onChange={(e) => setLeadForm({...leadForm, name: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="John Doe"
                 />
@@ -342,8 +387,8 @@ const Dashboard = () => {
                 <input
                   type="email"
                   required
-                  value={newLead.email}
-                  onChange={(e) => setNewLead({...newLead, email: e.target.value})}
+                  value={leadForm.email}
+                  onChange={(e) => setLeadForm({...leadForm, email: e.target.value})}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="john@example.com"
                 />
@@ -353,8 +398,8 @@ const Dashboard = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Status</label>
                   <select
-                    value={newLead.status}
-                    onChange={(e) => setNewLead({...newLead, status: e.target.value})}
+                    value={leadForm.status}
+                    onChange={(e) => setLeadForm({...leadForm, status: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="New">New</option>
@@ -367,8 +412,8 @@ const Dashboard = () => {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Source</label>
                   <select
-                    value={newLead.source}
-                    onChange={(e) => setNewLead({...newLead, source: e.target.value})}
+                    value={leadForm.source}
+                    onChange={(e) => setLeadForm({...leadForm, source: e.target.value})}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   >
                     <option value="Website">Website</option>
@@ -381,7 +426,7 @@ const Dashboard = () => {
               <div className="pt-4 flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeAndResetModal}
                   className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors font-medium"
                 >
                   Cancel
@@ -391,7 +436,8 @@ const Dashboard = () => {
                   disabled={isSubmitting}
                   className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-medium disabled:opacity-50"
                 >
-                  {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Create Lead'}
+                  {/* Dynamic Button Text */}
+                  {isSubmitting ? <Loader2 className="h-5 w-5 animate-spin" /> : (editingLeadId ? 'Update Lead' : 'Create Lead')}
                 </button>
               </div>
             </form>
